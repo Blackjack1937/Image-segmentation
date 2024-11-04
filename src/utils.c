@@ -80,3 +80,58 @@ void pm_erreur(char *texte)
     fprintf(stderr, "\n%s \n\n", texte);
     exit(1);
 }
+
+// void randomK(int K, int N, unsigned char *imageData, unsigned char *random_K_centers)
+// {
+//     for (int i = 0; i < K; i++)
+//     {
+//         int random = (float)rand() / RAND_MAX * N;
+//         // int random2 = rand() % N;
+//         printf("%d \n", random);
+//         // printf("%d \n", random2);
+//         random_K_centers[i * 3] = imageData[random * 3];
+//         random_K_centers[i * 3 + 1] = imageData[random * 3 + 1];
+//         random_K_centers[i * 3 + 2] = imageData[random * 3 + 2];
+//     }
+// }
+
+void random_K_coords(int K, int width, int height, int *random_K_centers)
+{
+    for (int i = 0; i < K; i++)
+    {
+        int random_index = rand() % (width * height);
+        int x = random_index % width;
+        int y = random_index / width;
+
+        random_K_centers[i * 2] = x;
+        random_K_centers[i * 2 + 1] = y;
+
+        printf("Center %d: (x, y) = (%d, %d)\n", i, x, y);
+    }
+}
+
+float **calculateDistances(int width, int height, int K, int *random_K_centers)
+{
+    int N = width * height;
+    float **distances = (float **)malloc(N * sizeof(float *));
+    for (int i = 0; i < N; i++)
+    {
+        distances[i] = (float *)malloc(K * sizeof(float));
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        int x_pixel = i % width;
+        int y_pixel = i / width;
+
+        for (int j = 0; j < K; j++)
+        {
+            int x_center = random_K_centers[j * 2];
+            int y_center = random_K_centers[j * 2 + 1];
+            float distance = sqrt(pow(x_pixel - x_center, 2) + pow(y_pixel - y_center, 2));
+            distances[i][j] = distance;
+        }
+    }
+
+    return distances;
+}

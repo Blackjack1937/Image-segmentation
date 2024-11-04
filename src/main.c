@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
+#include <time.h>
 
 int pm_getint(FILE *file);
 unsigned char pm_getrawbyte(FILE *file);
@@ -12,6 +13,9 @@ int main(int argc, char *argv[])
         printf("Usage: %s <input_ppm_file>\n", argv[0]);
         return 1;
     }
+
+    // Seed the random number generator
+    srand(time(NULL));
 
     FILE *inputFile = fopen(argv[1], "rb");
     if (inputFile == NULL)
@@ -34,6 +38,7 @@ int main(int argc, char *argv[])
 
     int width = pm_getint(inputFile);
     int height = pm_getint(inputFile);
+    int N = width * height; // Number of pixels in image
     int maxval = pm_getint(inputFile);
 
     if (maxval != 255)
@@ -54,14 +59,30 @@ int main(int argc, char *argv[])
     fread(imageData, 3, width * height, inputFile);
     fclose(inputFile);
 
-    for (int i = 0; i < width * height; i++)
+    // Test printing for imageData reading
+    /* for (int i = 0; i < width * height; i++)
     {
         unsigned char r = imageData[i * 3];
         unsigned char g = imageData[i * 3 + 1];
         unsigned char b = imageData[i * 3 + 2];
         printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
+    } */
+
+    // Getting random cluster centers
+    int K = 3; // Number of random cluster centers
+    unsigned char *random_K_centers = (unsigned char *)malloc(K * 3);
+    randomK(K, N, imageData, random_K_centers);
+
+    // Test printing for random centers
+    for (int i = 0; i < K; i++)
+    {
+        unsigned char r = random_K_centers[i * 3];
+        unsigned char g = random_K_centers[i * 3 + 1];
+        unsigned char b = random_K_centers[i * 3 + 2];
+        printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
     }
 
     free(imageData);
+    free(random_K_centers);
     return 0;
 }
