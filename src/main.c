@@ -53,3 +53,15 @@ int main(int argc, char *argv[])
 
     fread(imageData, 3, width * height, inputFile);
     fclose(inputFile);
+
+    for (int i = 0; i < width * height; i++)
+    {
+        unsigned char r = imageData[i * 3];
+        unsigned char g = imageData[i * 3 + 1];
+        unsigned char b = imageData[i * 3 + 2];
+        printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
+    }
+
+    free(imageData);
+    return 0;
+}
