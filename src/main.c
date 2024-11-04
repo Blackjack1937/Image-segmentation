@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     // Getting random cluster centers
     int K = 3; // Number of random cluster centers
     unsigned char *random_K_centers = (unsigned char *)malloc(K * 3);
-    randomK(K, N, imageData, random_K_centers);
+    random_K_coords(K, N, imageData, random_K_centers);
 
     // Test printing for random centers
     /*  for (int i = 0; i < K; i++)

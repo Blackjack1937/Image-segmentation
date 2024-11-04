@@ -95,7 +95,7 @@ void pm_erreur(char *texte)
 //     }
 // }
 
-void random_K_coords(int K, int width, int height, int *random_K_centers)
+void random_K_coords(int K, int width, int height, unsigned char *random_K_centers)
 {
     for (int i = 0; i < K; i++)
     {
@@ -110,7 +110,7 @@ void random_K_coords(int K, int width, int height, int *random_K_centers)
     }
 }
 
-float **calculateDistances(int width, int height, int K, int *random_K_centers)
+float **calculateDistances(int width, int height, int K, unsigned char *random_K_centers)
 {
     int N = width * height;
     float **distances = (float **)malloc(N * sizeof(float *));
