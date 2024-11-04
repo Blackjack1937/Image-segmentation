@@ -74,15 +74,31 @@ int main(int argc, char *argv[])
     randomK(K, N, imageData, random_K_centers);
 
     // Test printing for random centers
-    for (int i = 0; i < K; i++)
-    {
-        unsigned char r = random_K_centers[i * 3];
-        unsigned char g = random_K_centers[i * 3 + 1];
-        unsigned char b = random_K_centers[i * 3 + 2];
-        printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
-    }
+    /*  for (int i = 0; i < K; i++)
+     {
+         unsigned char r = random_K_centers[i * 3];
+         unsigned char g = random_K_centers[i * 3 + 1];
+         unsigned char b = random_K_centers[i * 3 + 2];
+         printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
+     } */
 
-    free(imageData);
+    // Calculate distances from each pixel to each center
+    float **distances = calculateDistances(width, height, K, random_K_centers);
+
+    // Example: print distances
+    for (int i = 0; i < width * height; i++)
+    {
+        for (int j = 0; j < K; j++)
+        {
+            printf("Distance from pixel %d to center %d: %f\n", i, j, distances[i][j]);
+        }
+    }
+    for (int i = 0; i < width * height; i++)
+    {
+        free(distances[i]);
+    }
+    free(distances);
     free(random_K_centers);
+    free(imageData);
     return 0;
 }
