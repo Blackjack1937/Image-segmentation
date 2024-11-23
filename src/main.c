@@ -8,16 +8,46 @@ unsigned char pm_getrawbyte(FILE *file);
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    int K;
+    printf("Enter the number of clusters (K): ");
+    if (scanf("%d", &K) != 1 || K <= 0)
     {
-        printf("Usage: %s <input_ppm_file>\n", argv[0]);
+        printf("Invalid number of clusters.\n");
         return 1;
     }
 
-    // Seed the random number generator
-    srand(time(NULL));
+    int method;
+    printf("Choose segmentation method:\n1. RGB-only\n2. RGB + location\nEnter your choice (1 or 2): ");
+    if (scanf("%d", &method) != 1 || (method != 1 && method != 2))
+    {
+        printf("Invalid choice.\n");
+        return 1;
+    }
 
-    FILE *inputFile = fopen(argv[1], "rb");
+    float lambda = 0.0; // default value for the weighing factor
+    if (method == 2)
+    {
+        printf("Enter the weighing factor for spatial influence (lambda): ");
+        if (scanf("%f", &lambda) != 1 || lambda < 0)
+        {
+            printf("Invalid weighing factor.\n");
+            return 1;
+        }
+    }
+
+    int stop_condition;
+    printf("Choose stopping condition:\n1. Center shift\n2. Pixel assignment stability\nEnter your choice (1 or 2): ");
+    if (scanf("%d", &stop_condition) != 1 || (stop_condition != 1 && stop_condition != 2))
+    {
+        printf("Invalid choice.\n");
+        return 1;
+    }
+
+    char inputFileName[100];
+    printf("Enter the input file name: ");
+    scanf("%99s", inputFileName);
+
+    FILE *inputFile = fopen(inputFileName, "rb");
     if (inputFile == NULL)
     {
         printf("Error opening input file.\n");
@@ -38,7 +68,6 @@ int main(int argc, char *argv[])
 
     int width = pm_getint(inputFile);
     int height = pm_getint(inputFile);
-    int N = width * height; // Number of pixels in image
     int maxval = pm_getint(inputFile);
 
     if (maxval != 255)
@@ -59,46 +88,21 @@ int main(int argc, char *argv[])
     fread(imageData, 3, width * height, inputFile);
     fclose(inputFile);
 
-    // Test printing for imageData reading
-    /* for (int i = 0; i < width * height; i++)
+    if (method == 1)
     {
-        unsigned char r = imageData[i * 3];
-        unsigned char g = imageData[i * 3 + 1];
-        unsigned char b = imageData[i * 3 + 2];
-        printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
-    } */
-
-    // Getting random cluster centers
-    int K = 3; // Number of random cluster centers
-    unsigned char *random_K_centers = (unsigned char *)malloc(K * 3);
-    random_K_coords(K, N, imageData, random_K_centers);
-
-    // Test printing for random centers
-    /*  for (int i = 0; i < K; i++)
-     {
-         unsigned char r = random_K_centers[i * 3];
-         unsigned char g = random_K_centers[i * 3 + 1];
-         unsigned char b = random_K_centers[i * 3 + 2];
-         printf("Pixel %d: R=%d G=%d B=%d\n", i, r, g, b);
-     } */
-
-    // Calculate distances from each pixel to each center
-    float **distances = calculateDistances(width, height, K, random_K_centers);
-
-    // Example: print distances
-    for (int i = 0; i < width * height; i++)
-    {
-        for (int j = 0; j < K; j++)
-        {
-            printf("Distance from pixel %d to center %d: %f\n", i, j, distances[i][j]);
-        }
+        kmeans_segmentation(imageData, width, height, K, stop_condition);
     }
-    for (int i = 0; i < width * height; i++)
+    else
     {
-        free(distances[i]);
+        kmeans_segmentation_RGB_location(imageData, width, height, K, stop_condition, lambda);
     }
-    free(distances);
-    free(random_K_centers);
+
+    char outputFileName[100];
+    printf("Enter the output file name with '.ppm' extension: ");
+    scanf("%99s", outputFileName);
+
+    save_image(imageData, width, height, outputFileName);
+
     free(imageData);
     return 0;
 }
